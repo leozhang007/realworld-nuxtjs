@@ -1,5 +1,6 @@
 module.exports = {
   router: {
+    linkActiveClass: 'active',
     // 自定义路由规则
     extendRoutes (routes, resolve) {
       routes.splice(0)
