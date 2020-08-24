@@ -21,8 +21,8 @@
             </li>
             <li class="nav-item">
               <nuxt-link to="/profile/123" class="nav-link" >
-                <img class="user-pic" src="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1141259048,554497535&amp;fm=26&amp;gp=0.jpg">
-                Leo.zhang
+                <img class="user-pic" :src="user.image">
+                {{ user.username }}
               </nuxt-link>
             </li>
 
