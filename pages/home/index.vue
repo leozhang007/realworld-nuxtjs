@@ -36,7 +36,7 @@
                   exact
                   class="nav-link"
                   :class="{
-                    active: tab === 'gobal_feed'
+                    active: tab === 'global_feed'
                   }"
                   :to="{
                     name: 'home',
