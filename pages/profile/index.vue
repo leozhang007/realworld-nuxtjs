@@ -6,15 +6,24 @@
         <div class="row">
 
           <div class="col-xs-12 col-md-10 offset-md-1">
-            <img src="http://i.imgur.com/Qr71crq.jpg" class="user-img" />
-            <h4>Eric Simons</h4>
-            <p>
-              Cofounder @GoThinkster, lived in Aol's HQ for a few months, kinda looks like Peeta from the Hunger Games
-            </p>
-            <button class="btn btn-sm btn-outline-secondary action-btn">
+            <img :src="profile.image" class="user-img" />
+            <h4>{{ profile.username }}</h4>
+            <p v-html="profile.bio" ></p>
+            <nuxt-link
+              v-if="user.username === profile.username"
+              to="/settings"
+            >
+              <i class="ion-gear-a"></i>Edit Profile Settings
+            </nuxt-link>
+            <button 
+              class="btn btn-sm action-btn"
+              v-else
+              @click="toggleFollow(profile)"
+              :class="[profile.following ? 'btn-secondary':'btn-outline-secondary']"
+            >
               <i class="ion-plus-round"></i>
               &nbsp;
-              Follow Eric Simons 
+              {{ profile.following ? 'Unfollow' : 'Follow' }} {{ profile.username }}
             </button>
           </div>
 
@@ -29,54 +38,36 @@
           <div class="articles-toggle">
             <ul class="nav nav-pills outline-active">
               <li class="nav-item">
-                <a class="nav-link active" href="">My Articles</a>
+                <nuxt-link
+                  :to="{path: `${username}`}"
+                  class="nav-link"
+                  exact
+                  :class="{
+                    active: !feed
+                  }"
+                >
+                  My Acticles
+                </nuxt-link>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="">Favorited Articles</a>
+                <nuxt-link 
+                  class="nav-link"
+                  :to="{
+                    path: `${username}`,
+                    query: {
+                      feed: 'favorites'
+                    }
+                  }"
+                  exact
+                  :class="{active: feed}"
+                >
+                  Favorited Articles
+                </nuxt-link>
               </li>
             </ul>
           </div>
 
-          <div class="article-preview">
-            <div class="article-meta">
-              <a href=""><img src="http://i.imgur.com/Qr71crq.jpg" /></a>
-              <div class="info">
-                <a href="" class="author">Eric Simons</a>
-                <span class="date">January 20th</span>
-              </div>
-              <button class="btn btn-outline-primary btn-sm pull-xs-right">
-                <i class="ion-heart"></i> 29
-              </button>
-            </div>
-            <a href="" class="preview-link">
-              <h1>How to build webapps that scale</h1>
-              <p>This is the description for the post.</p>
-              <span>Read more...</span>
-            </a>
-          </div>
-
-          <div class="article-preview">
-            <div class="article-meta">
-              <a href=""><img src="http://i.imgur.com/N4VcUeJ.jpg" /></a>
-              <div class="info">
-                <a href="" class="author">Albert Pai</a>
-                <span class="date">January 20th</span>
-              </div>
-              <button class="btn btn-outline-primary btn-sm pull-xs-right">
-                <i class="ion-heart"></i> 32
-              </button>
-            </div>
-            <a href="" class="preview-link">
-              <h1>The song you won't ever stop singing. No matter how hard you try.</h1>
-              <p>This is the description for the post.</p>
-              <span>Read more...</span>
-              <ul class="tag-list">
-                <li class="tag-default tag-pill tag-outline">Music</li>
-                <li class="tag-default tag-pill tag-outline">Song</li>
-              </ul>
-            </a>
-          </div>
-
+          <article-list :articles="articles" :onFavorite="onFavorite"  />
 
         </div>
 
@@ -87,9 +78,77 @@
 </template>
 
 <script>
+import { getProfile, followUser, unFollowUser } from '@/api/user'
+import { mapState } from 'vuex'
+import { getArticles, deleteFavorite, addFavorite } from '@/api/article'
+import ArticleList from '@/components/articleList'
+
 export default {
   middleware: 'authenticated',
-  name: 'UserProfile'
+  name: 'UserProfile',
+  components: {
+    ArticleList
+  },
+  async asyncData ({ params, store, query }) {
+    const { feed } = query
+    const { username } = params
+    let profile = {}
+    const initProfile = store.state.getProfile
+    if (initProfile && initProfile.username === username) {
+      profile = initProfile
+    } else {
+      const res = await getProfile(username)
+      store.commit('setProfile', res.profile)
+      profile = res.profile
+    }
+
+    const pageQuery = { limit: 5, offset: 0 }
+    if (feed) {
+      pageQuery.favorited = username
+    } else {
+      pageQuery.author = username
+    }
+
+    const { articles, articlesCount } = await getArticles(pageQuery)
+
+    articles.forEach(article => article.favoriteDisabled = false)
+
+    return {
+      username,
+      feed,
+      profile,
+      articles, 
+      articlesCount
+    }
+  },
+  computed: {
+    ...mapState(['user'])
+  },
+  watchQuery: ['feed', 'p'],
+  methods: {
+    async toggleFollow (profile) {
+      const follow = profile.following ? unFollowUser : followUser
+      const res = await follow(profile.username)
+      this.profile = res.profile
+      this.$store.commit('setProfile', res.profile)
+    },
+    async onFavorite (article) {
+    
+      article.favoriteDisabled = true
+
+      if (article.favorited) {
+        await deleteFavorite(article.slug)
+        article.favorited = false
+        article.favoritesCount += -1
+      } else {
+        await addFavorite(article.slug)
+        article.favorited = true
+        article.favoritesCount += 1
+      }
+      article.favoriteDisabled = false
+      
+    }
+  }
 }
 </script>
 

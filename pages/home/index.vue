@@ -66,60 +66,7 @@
             </ul>
           </div>
 
-          <div 
-            class="article-preview"
-            v-for="article in articles"
-            :key="article.slug"
-          >
-            <div class="article-meta">
-              <nuxt-link 
-                :to="{
-                  name: 'profile',
-                  params: {
-                    username: article.author.username
-                  }
-                }"
-                >
-                <img :src="article.author.image" />
-              </nuxt-link >
-              <div class="info">
-                <nuxt-link 
-                  :to="{
-                    name: 'profile',
-                    params: {
-                      username: article.author.username
-                    }
-                  }"
-                  >
-                  {{ article.author.username }}
-                </nuxt-link >
-                <span class="date">{{ article.createdAt | date('MMM DD, YYYY') }}</span>
-              </div>
-              <button 
-                class="btn btn-outline-primary btn-sm pull-xs-right"
-                :class="{
-                  active: article.favorited
-                }"
-                @click="onFavorite(article)"
-                :disabled="article.favoriteDisabled"
-                >
-                <i class="ion-heart"></i> {{ article.favoritesCount }}
-              </button>
-            </div>
-            <nuxt-link 
-              class="preview-link"
-              :to="{
-                name: 'article',
-                params: {
-                  slug: article.slug
-                }
-              }"
-              >
-              <h1>{{ article.title }}</h1>
-              <p>{{ article.description }}</p>
-              <span>Read more...</span>
-            </nuxt-link>
-          </div>
+          <article-list :articles="articles" :onFavorite="onFavorite"  />
           
           <!-- 分页列表 -->
           <nav>
@@ -180,16 +127,20 @@
 import { getArticles, getYourFeedArticles, addFavorite, deleteFavorite } from '@/api/article'
 import { getTags } from '@/api/tag'
 import { mapState } from 'vuex'
+import ArticleList from '@/components/articleList'
 
 export default {
   name: 'HomeIndex',
+  components: {
+    ArticleList
+  },
   async asyncData ({ query }) {
     const page = Number.parseInt(query.page || 1)
     const limit = 20
     const tab = query.tab || 'global_feed'
     const tag = query.tag
     const loadArticles = tab === 'your_feed' ? getYourFeedArticles : getArticles
-    const [ articleRes, tagRes ] = await Promise.all([
+    const [ data, tagData ] = await Promise.all([
       loadArticles({
         limit,
         offset: (page - 1) * 2,
@@ -197,9 +148,9 @@ export default {
       }),
       getTags()
     ])
-    
-    const { articles, articlesCount } = articleRes.data
-    const { tags } = tagRes.data
+
+    const { articles, articlesCount } = data
+    const { tags } = tagData
 
     articles.forEach(article => article.favoriteDisabled = false)
 

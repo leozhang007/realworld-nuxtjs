@@ -15,4 +15,15 @@ export default ({ store }) => {
     // 如果请求失败 (此时请求还没有发出去) 就会进入这里
     return Promise.reject(error)
   })
+
+  request.interceptors.response.use(function (response) {
+    return response.data;
+  }, function (error) {
+    const { status, data } = error.response
+    if (status === '404') {
+      return Promise.reject(error)
+    } else {
+      return Promise.reject(data)
+    }
+  })
 }

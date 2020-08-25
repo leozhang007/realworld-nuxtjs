@@ -20,7 +20,7 @@
 
           <form @submit.prevent="onSubmit">
             <fieldset v-if="!isLogin" class="form-group">
-              <input class="form-control form-control-lg" type="text" placeholder="Your Name" required>
+              <input v-model="user.username" class="form-control form-control-lg" type="text" placeholder="Your Name" required>
             </fieldset>
             <fieldset class="form-group">
               <input v-model="user.email" class="form-control form-control-lg" type="email" placeholder="Email" required>
@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import {login} from '@/api/user'
+import { login, register } from '@/api/user'
 const Cookie = process.client ? require('js-cookie') : undefined
 
 export default {
@@ -55,7 +55,8 @@ export default {
     return {
       user: {
         email: '',
-        password: ''
+        password: '',
+        username: ''
       },
       errors: {}
     }
@@ -63,16 +64,16 @@ export default {
   methods: {
     async onSubmit () {
       try {
-        console.log(this.user);
-        const { data } = await login({ user: this.user })
+        
+        const request = this.isLogin ? login : register
+        const { user } = await request({ user: this.user })
 
-        this.$store.commit('setUser', data.user)
-        Cookie.set('user', data.user)
+        this.$store.commit('setUser', user)
+        Cookie.set('user', user)
         this.$router.push('/')
         
       } catch (error) {
-        console.log(error);
-        this.errors = error.response.data.errors
+        this.errors = error.errors
       }
     }
   }

@@ -50,8 +50,7 @@ export default {
     ArticleComments
   },
   async asyncData ({ params }) {
-    const { data } = await getArticle(params.slug)
-    const { article } = data
+    const { article } = await getArticle(params.slug)
     const md = new MarkdownIt()
     article.body = md.render(article.body)
     return {

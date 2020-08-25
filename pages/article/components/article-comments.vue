@@ -72,8 +72,8 @@ export default {
     }
   },
   async mounted () {
-    const { data } = await getComments(this.article.slug)
-    this.comments = data.comments
+    const { comments } = await getComments(this.article.slug)
+    this.comments = comments
   }
 }
 </script>
