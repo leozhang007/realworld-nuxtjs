@@ -142,7 +142,7 @@ export default {
       const tab = query.tab || 'global_feed'
       const tag = query.tag
       const loadArticles = tab === 'your_feed' ? getYourFeedArticles : getArticles
-      const [ data, tagData ] = await Promise.all([
+      const [ data = {}, tagData ] = await Promise.all([
         loadArticles({
           limit,
           offset: (page - 1) * 2,
