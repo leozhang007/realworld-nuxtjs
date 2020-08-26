@@ -5,7 +5,7 @@
         <textarea class="form-control" placeholder="Write a comment..." rows="3"></textarea>
       </div>
       <div class="card-footer">
-        <img :src="user.image" class="comment-author-img" />
+        <img v-if="user" :src="user.image" class="comment-author-img" />
         <button class="btn btn-sm btn-primary">
         Post Comment
         </button>
