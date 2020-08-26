@@ -134,34 +134,41 @@ export default {
   components: {
     ArticleList
   },
-  async asyncData ({ query }) {
-    const page = Number.parseInt(query.page || 1)
-    const limit = 20
-    const tab = query.tab || 'global_feed'
-    const tag = query.tag
-    const loadArticles = tab === 'your_feed' ? getYourFeedArticles : getArticles
-    const [ data, tagData ] = await Promise.all([
-      loadArticles({
-        limit,
-        offset: (page - 1) * 2,
-        tag
-      }),
-      getTags()
-    ])
+  async asyncData ({ query, error }) {
+    try {
+      console.log(error);
+      const page = Number.parseInt(query.page || 1)
+      const limit = 20
+      const tab = query.tab || 'global_feed'
+      const tag = query.tag
+      const loadArticles = tab === 'your_feed' ? getYourFeedArticles : getArticles
+      const [ data, tagData ] = await Promise.all([
+        loadArticles({
+          limit,
+          offset: (page - 1) * 2,
+          tag
+        }),
+        getTags()
+      ])
 
-    const { articles, articlesCount } = data
-    const { tags } = tagData
+      const { articles, articlesCount } = data
+      const { tags } = tagData
 
-    articles.forEach(article => article.favoriteDisabled = false)
+      articles.forEach(article => article.favoriteDisabled = false)
 
-    return {
-      articles, // 文章列表
-      articlesCount, // 文章总数
-      tags, // 标签列表
-      limit, // 每页大小
-      page, // 页码
-      tab, // 选项卡
-      tag // 数据标签
+      return {
+        articles, // 文章列表
+        articlesCount, // 文章总数
+        tags, // 标签列表
+        limit, // 每页大小
+        page, // 页码
+        tab, // 选项卡
+        tag // 数据标签
+      }
+    } catch (err) {
+      console.log(err);
+      console.log('=====================');
+      error(err)
     }
   },
   watchQuery: ['page', 'tag', 'tab'],
