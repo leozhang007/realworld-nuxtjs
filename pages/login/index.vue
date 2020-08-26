@@ -66,7 +66,7 @@ export default {
       try {
         
         const request = this.isLogin ? login : register
-        const { user } = await request({ user: this.user })
+        const { data: { user } } = await request({ user: this.user })
 
         this.$store.commit('setUser', user)
         Cookie.set('user', user)

@@ -17,7 +17,8 @@ export default ({ store }) => {
   })
 
   request.interceptors.response.use(function (response) {
-    return response.data;
+    // TODO: token 过期处理
+    return response
   }, function (error) {
     const { status, data } = error.response
     if (status === '404') {

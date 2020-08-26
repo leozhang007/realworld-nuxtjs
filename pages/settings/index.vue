@@ -44,7 +44,7 @@ export default {
   middleware: 'authenticated',
   name: 'Settings',
   async asyncData ({ params, query }) {
-    const { user } = await getUser()
+    const { data: { user } } = await getUser()
     return {
       user: {
         bio: user.bio,
@@ -57,7 +57,7 @@ export default {
   },
   methods: {
     async onSubmit () {
-      const {user} = await updateUser(this.user)
+      const { data: { user } } = await updateUser(this.user)
       this.$router.push(`profile/${user.username}`)
     },
     logout () {

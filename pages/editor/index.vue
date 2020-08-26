@@ -48,7 +48,7 @@ export default {
   name: 'EditorIndex',
   async asyncData ({ store, env, params, query }) {
     if (params.slug) {
-      const { article } = await editArticle(params.slug)
+      const { data: { article } } = await editArticle(params.slug)
       return {
         article
       }
@@ -72,7 +72,7 @@ export default {
   methods: {
     async onSubmit () {
       const request = this.article.slug ? updateArticle : createArticle;
-      const { article } = await request(this.article);
+      const { data: { article } } = await request(this.article);
       if (article) {
         this.$router.push({
           name: "article",

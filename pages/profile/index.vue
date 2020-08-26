@@ -97,9 +97,9 @@ export default {
     if (initProfile && initProfile.username === username) {
       profile = initProfile
     } else {
-      const res = await getProfile(username)
-      store.commit('setProfile', res.profile)
-      profile = res.profile
+      const { data } = await getProfile(username)
+      store.commit('setProfile', data.profile)
+      profile = data.profile
     }
 
     const pageQuery = { limit: 5, offset: 0 }
@@ -109,7 +109,8 @@ export default {
       pageQuery.author = username
     }
 
-    const { articles, articlesCount } = await getArticles(pageQuery)
+    const { data } = await getArticles(pageQuery)
+    const { articles, articlesCount } = data
 
     articles.forEach(article => article.favoriteDisabled = false)
 
@@ -128,9 +129,9 @@ export default {
   methods: {
     async toggleFollow (profile) {
       const follow = profile.following ? unFollowUser : followUser
-      const res = await follow(profile.username)
-      this.profile = res.profile
-      this.$store.commit('setProfile', res.profile)
+      const { data } = await follow(profile.username)
+      this.profile = data.profile
+      this.$store.commit('setProfile', data.profile)
     },
     async onFavorite (article) {
     

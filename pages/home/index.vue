@@ -136,13 +136,12 @@ export default {
   },
   async asyncData ({ query, error }) {
     try {
-      console.log(error);
       const page = Number.parseInt(query.page || 1)
       const limit = 20
       const tab = query.tab || 'global_feed'
       const tag = query.tag
       const loadArticles = tab === 'your_feed' ? getYourFeedArticles : getArticles
-      const [ data = {}, tagData ] = await Promise.all([
+      const [ data, tagData ] = await Promise.all([
         loadArticles({
           limit,
           offset: (page - 1) * 2,
@@ -151,8 +150,8 @@ export default {
         getTags()
       ])
 
-      const { articles, articlesCount } = data
-      const { tags } = tagData
+      const { articles, articlesCount } = data.data
+      const { tags } = tagData.data
 
       articles.forEach(article => article.favoriteDisabled = false)
 
